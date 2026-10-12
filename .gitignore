@@ -1,0 +1,31 @@
+# Ignore dependencies and local environment files
+/vendor/
+/node_modules/
+/.env
+/.env.*
+!.env.example
+
+# Cache and build artifacts
+/bootstrap/cache/*.php
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/public/build
+/public/hot
+/public/storage
+
+# IDE/editor files
+/.idea/
+/.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Test and coverage output
+/phpunit.result.cache
+/coverage/
+
+# Composer lock is usually kept in repo; uncomment if you prefer not to track it
+# composer.lock
