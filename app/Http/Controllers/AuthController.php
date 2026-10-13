@@ -17,6 +17,11 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    public function showThinkOceanLogin(): View
+    {
+        return view('auth.think-ocean-login');
+    }
+
     public function login(LoginRequest $request): RedirectResponse
     {
         if (! Auth::attempt($request->safe()->only(['email', 'password']), $request->boolean('remember'))) {
@@ -26,6 +31,17 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended(route('omney-safari.bookings'));
+    }
+
+    public function loginThinkOcean(LoginRequest $request): RedirectResponse
+    {
+        if (! Auth::attempt($request->safe()->only(['email', 'password']), $request->boolean('remember'))) {
+            return back()->withErrors(['email' => 'These credentials do not match our records.'])->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('think-ocean.admin.index'));
     }
 
     public function showRegister(): View

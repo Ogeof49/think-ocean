@@ -24,13 +24,22 @@ class ThinkOceanPageTest extends TestCase
             ->assertSee('rel="canonical"', false);
     }
 
-    public function test_navigation_links_have_section_targets(): void
+    public function test_navigation_links_point_to_standalone_pages(): void
     {
         $response = $this->get(route('think-ocean'));
 
-        foreach (['home', 'about', 'what-we-do', 'projects', 'get-involved', 'news', 'contact'] as $section) {
-            $response->assertSee('id="'.$section.'"', false)->assertSee('href="#'.$section.'"', false);
+        foreach (['about', 'what-we-do', 'projects', 'get-involved', 'news', 'contact', 'donate'] as $page) {
+            $response->assertSee(route('think-ocean.pages.show', $page), false);
         }
+    }
+
+    public function test_standalone_pages_are_public_and_unknown_pages_are_not_found(): void
+    {
+        foreach (['about', 'what-we-do', 'projects', 'get-involved', 'news', 'contact', 'donate'] as $page) {
+            $this->get(route('think-ocean.pages.show', $page))->assertOk();
+        }
+
+        $this->get('/think-ocean/pages/not-a-page')->assertNotFound();
     }
 
     public function test_only_published_projects_and_posts_are_visible(): void

@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [OmneySafariController::class, 'home'])->name('home');
 Route::get('/think-ocean', [ThinkOceanController::class, 'index'])->name('think-ocean');
+Route::get('/think-ocean/pages/{page}', [ThinkOceanController::class, 'page'])
+    ->whereIn('page', ['about', 'what-we-do', 'projects', 'get-involved', 'news', 'contact', 'donate'])
+    ->name('think-ocean.pages.show');
 Route::get('/think-ocean/projects/{project:slug}', [ThinkOceanController::class, 'project'])->name('think-ocean.projects.show');
 Route::get('/think-ocean/news/{post:slug}', [ThinkOceanController::class, 'post'])->name('think-ocean.posts.show');
 Route::get('/think-ocean/privacy', [ThinkOceanController::class, 'privacy'])->name('think-ocean.privacy');
@@ -40,6 +43,8 @@ Route::get('/admin/v1/properties/{property}', function (int $property) {
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+    Route::get('/think-ocean/login', [AuthController::class, 'showThinkOceanLogin'])->name('think-ocean.login');
+    Route::post('/think-ocean/login', [AuthController::class, 'loginThinkOcean'])->name('think-ocean.login.store');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 });

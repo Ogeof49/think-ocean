@@ -24,6 +24,30 @@ class ThinkOceanController extends Controller
         ]);
     }
 
+    public function page(string $page): View
+    {
+        $pages = [
+            'about' => ['title' => 'About Think Ocean', 'eyebrow' => 'Who we are'],
+            'what-we-do' => ['title' => 'What We Do', 'eyebrow' => 'Our mission'],
+            'projects' => ['title' => 'Our Projects', 'eyebrow' => 'Practical action'],
+            'get-involved' => ['title' => 'Get Involved', 'eyebrow' => 'Join the movement'],
+            'news' => ['title' => 'News & Insights', 'eyebrow' => 'From the ocean'],
+            'contact' => ['title' => 'Contact Think Ocean', 'eyebrow' => 'Start a conversation'],
+            'donate' => ['title' => 'Support Our Work', 'eyebrow' => 'Create lasting impact'],
+        ];
+
+        abort_unless(array_key_exists($page, $pages), 404);
+
+        return view('think-ocean-page', [
+            ...$pages[$page],
+            'page' => $page,
+            'settings' => array_merge(config('think_ocean.defaults'), ThinkOceanSetting::query()->pluck('value', 'key')->all()),
+            'projects' => ThinkOceanProject::query()->published()->orderBy('sort_order')->orderByDesc('id')->get(),
+            'posts' => ThinkOceanPost::query()->published()->latest('published_at')->get(),
+            'contactEmail' => config('think_ocean.email'),
+        ]);
+    }
+
     public function privacy(): View
     {
         return view('think-ocean-legal', ['title' => 'Privacy Policy', 'contactEmail' => config('think_ocean.email')]);

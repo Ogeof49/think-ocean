@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -61,5 +61,26 @@ class AuthenticationTest extends TestCase
 
         $response->assertSessionHasErrors('email');
         $this->assertGuest();
+    }
+
+    public function test_think_ocean_has_a_separate_branded_login(): void
+    {
+        $this->get(route('think-ocean.login'))
+            ->assertOk()
+            ->assertSee('THINK OCEAN')
+            ->assertSee('CMS sign in')
+            ->assertSee(route('think-ocean.login.store'), false);
+    }
+
+    public function test_think_ocean_login_redirects_to_its_cms(): void
+    {
+        $user = User::factory()->create(['password' => 'password123']);
+
+        $this->post(route('think-ocean.login.store'), [
+            'email' => $user->email,
+            'password' => 'password123',
+        ])->assertRedirect(route('think-ocean.admin.index'));
+
+        $this->assertAuthenticatedAs($user);
     }
 }
