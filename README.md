@@ -1,6 +1,6 @@
-# Omney Safari and Think Ocean
+# Think Ocean
 
-A production-ready Laravel 12 application for Omney Safari, including the Think Ocean public website and its protected content-management system.
+A production-ready Laravel 12 application for Think Ocean public website and its protected content-management system.
 
 ## Requirements
 
