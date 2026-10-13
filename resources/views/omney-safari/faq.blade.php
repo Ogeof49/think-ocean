@@ -1,0 +1,6 @@
+@extends('omney-safari.layout')
+@section('title', 'Frequently Asked Questions')
+@section('content')
+<header class="hero"><div class="container"><span class="eyebrow">TRAVEL WITH CONFIDENCE</span><h1>Frequently asked questions.</h1><p>Clear answers about bookings, payments, travel requirements, and your Uganda safari.</p></div></header>
+<main class="section"><div class="container faq"><details open><summary>How do I pay for my safari?</summary><p>Book through our secure bookings page and continue to Pesapal. Pesapal supports MTN MoMo, Airtel Money, cards, and other available payment options.</p></details><details><summary>When is my booking approved?</summary><p>Your booking is approved automatically after Pesapal confirms a completed payment. You will see an approval notification in your bookings page.</p></details><details><summary>Can I change my travel date?</summary><p>Contact our team with your booking reference. Changes depend on permit and accommodation availability.</p></details><details><summary>What should I bring?</summary><p>Comfortable walking shoes, neutral clothing, rain protection, sun protection, and any personal medication are recommended.</p></details></div></main>
+@endsection
