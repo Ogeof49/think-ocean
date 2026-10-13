@@ -23,4 +23,9 @@ class ThinkOceanPost extends Model
     {
         return $query->where('is_published', true)->whereNotNull('published_at')->where('published_at', '<=', now());
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

@@ -46,4 +46,53 @@ class ThinkOceanPageTest extends TestCase
             ->assertSee('Visible article')
             ->assertDontSee('Hidden article');
     }
+
+    public function test_published_project_and_article_cards_link_to_public_detail_pages(): void
+    {
+        $project = ThinkOceanProject::query()->create([
+            'title' => 'Coastal restoration',
+            'slug' => 'coastal-restoration',
+            'summary' => 'Restoring a community coastline.',
+            'content' => 'The full project story.',
+            'is_published' => true,
+        ]);
+        $post = ThinkOceanPost::query()->create([
+            'title' => 'Ocean action update',
+            'slug' => 'ocean-action-update',
+            'excerpt' => 'An update from the field.',
+            'content' => 'The full article.',
+            'is_published' => true,
+            'published_at' => now(),
+        ]);
+
+        $this->get(route('think-ocean'))
+            ->assertSee(route('think-ocean.projects.show', $project), false)
+            ->assertSee(route('think-ocean.posts.show', $post), false);
+
+        $this->get(route('think-ocean.projects.show', $project))
+            ->assertOk()
+            ->assertSee('The full project story.');
+        $this->get(route('think-ocean.posts.show', $post))
+            ->assertOk()
+            ->assertSee('The full article.');
+    }
+
+    public function test_unpublished_project_and_article_detail_pages_are_not_public(): void
+    {
+        $project = ThinkOceanProject::query()->create([
+            'title' => 'Draft project',
+            'slug' => 'draft-project',
+            'summary' => 'Not public.',
+            'is_published' => false,
+        ]);
+        $post = ThinkOceanPost::query()->create([
+            'title' => 'Draft article',
+            'slug' => 'draft-article',
+            'excerpt' => 'Not public.',
+            'is_published' => false,
+        ]);
+
+        $this->get(route('think-ocean.projects.show', $project))->assertNotFound();
+        $this->get(route('think-ocean.posts.show', $post))->assertNotFound();
+    }
 }

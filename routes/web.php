@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\ThinkOceanCmsController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuluRentalsController;
 use App\Http\Controllers\OmneySafariController;
 use App\Http\Controllers\SafariBookingController;
@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [OmneySafariController::class, 'home'])->name('home');
 Route::get('/think-ocean', [ThinkOceanController::class, 'index'])->name('think-ocean');
+Route::get('/think-ocean/projects/{project:slug}', [ThinkOceanController::class, 'project'])->name('think-ocean.projects.show');
+Route::get('/think-ocean/news/{post:slug}', [ThinkOceanController::class, 'post'])->name('think-ocean.posts.show');
 Route::get('/think-ocean/privacy', [ThinkOceanController::class, 'privacy'])->name('think-ocean.privacy');
 Route::get('/think-ocean/accessibility', [ThinkOceanController::class, 'accessibility'])->name('think-ocean.accessibility');
 
