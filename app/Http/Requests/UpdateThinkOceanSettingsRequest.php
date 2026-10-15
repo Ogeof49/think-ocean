@@ -31,6 +31,12 @@ class UpdateThinkOceanSettingsRequest extends FormRequest
             'registered_office' => ['nullable', 'string', 'max:255'],
             'volunteer_email' => ['required', 'email', 'max:255'],
             'partner_email' => ['required', 'email', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:50'],
+            'contact_address' => ['nullable', 'string', 'max:255'],
+            'facebook_url' => ['nullable', 'url', 'max:255'],
+            'linkedin_url' => ['nullable', 'url', 'max:255'],
+            'instagram_url' => ['nullable', 'url', 'max:255'],
+            'youtube_url' => ['nullable', 'url', 'max:255'],
         ];
     }
 

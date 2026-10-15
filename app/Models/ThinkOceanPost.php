@@ -10,8 +10,10 @@ class ThinkOceanPost extends Model
 {
     use HasFactory;
 
+    public const CATEGORIES = ['News', 'Insights', 'Stories', 'Events'];
+
     protected $fillable = [
-        'title', 'slug', 'excerpt', 'content', 'image_path', 'is_published', 'published_at',
+        'title', 'slug', 'category', 'excerpt', 'content', 'image_path', 'is_published', 'published_at',
     ];
 
     protected function casts(): array
