@@ -59,3 +59,5 @@ Route::get('/omney-safari/about-us', [OmneySafariController::class, 'about'])->n
 Route::get('/omney-safari/scr', [OmneySafariController::class, 'scr'])->name('omney-safari.scr');
 Route::get('/omney-safari/bookings/pesapal/callback', [SafariBookingController::class, 'callback'])->name('omney-safari.booking.callback');
 Route::get('/omney-safari/bookings/pesapal/ipn', [SafariBookingController::class, 'ipn'])->name('omney-safari.booking.ipn');
+
+date_default_timezone_set('Africa/Kampala');
