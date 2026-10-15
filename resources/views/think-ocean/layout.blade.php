@@ -211,5 +211,6 @@
         </div>
     </footer>
     <script>document.querySelectorAll('.mobile-nav a').forEach(link => link.addEventListener('click', () => link.closest('details').open = false));</script>
+    @stack('scripts')
 </body>
 </html>

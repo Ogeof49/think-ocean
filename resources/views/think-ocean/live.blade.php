@@ -15,6 +15,11 @@
         .on-air.off{background:rgba(255,255,255,.12);color:#cfe6ee}
         .screen{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:var(--radius);background:#000;box-shadow:0 30px 70px rgba(0,0,0,.45)}
         .screen iframe,.screen video{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain;background:#000}
+        .stream-fallback{position:absolute;inset:0;z-index:3;display:none;place-items:center;padding:28px;text-align:center;background:linear-gradient(145deg,rgba(8,47,71,.96),rgba(10,75,101,.94));color:#fff}
+        .stream-fallback.is-visible{display:grid}
+        .stream-fallback h2{color:#fff;font-size:clamp(22px,3vw,30px);font-weight:600}
+        .stream-fallback p{max-width:520px;margin:10px auto 20px;color:#cfe6ee}
+        .stream-fallback .btn{border:0;cursor:pointer}
         .live-badge{position:absolute;top:14px;left:14px;z-index:2;padding:5px 10px;border-radius:4px;background:#e11d48;color:#fff;font-size:12px;font-weight:700;letter-spacing:.08em;pointer-events:none}
         .stream-status{margin-top:12px;text-align:center;font-size:13px;color:#9fc3cf}
         .off-screen{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;background:linear-gradient(rgba(8,47,71,.78),rgba(8,47,71,.9)),url('{{ asset('images/think-ocean/about-quote.jpg') }}') center/cover}
@@ -54,6 +59,13 @@
                 @elseif($stream)
                     <span class="live-badge" aria-hidden="true">● LIVE</span>
                     <video id="live-player" controls autoplay muted playsinline preload="auto" @if($stream['type'] === 'video') src="{{ $stream['src'] }}" @endif data-hls="{{ $stream['type'] === 'hls' ? $stream['src'] : '' }}"></video>
+                    <div class="stream-fallback" id="stream-fallback" role="alert">
+                        <div>
+                            <h2>Live stream temporarily unavailable</h2>
+                            <p>The broadcast server is responding too slowly. Please retry in a moment.</p>
+                            <button class="btn" id="retry-stream" type="button">Retry live stream</button>
+                        </div>
+                    </div>
                 @else
                     <div class="off-screen">
                         <div>
@@ -91,63 +103,101 @@
 @endsection
 
 @if($stream && $stream['type'] !== 'iframe')
-    @push('styles')
+    @push('scripts')
         @if($stream['type'] === 'hls')
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js" defer></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
         @endif
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            (() => {
                 const video = document.getElementById('live-player');
                 const status = document.getElementById('stream-status');
+                const fallback = document.getElementById('stream-fallback');
+                const retry = document.getElementById('retry-stream');
                 const source = video.dataset.hls;
                 const liveText = @json('LIVE — '.$settings['live_title']);
+                let hls;
+                let connectionTimer;
                 const setStatus = message => status.textContent = message;
-                const play = () => video.play().then(() => setStatus(liveText)).catch(() => setStatus('LIVE — press play to start'));
+                const clearConnectionTimer = () => window.clearTimeout(connectionTimer);
+                const showFallback = () => {
+                    clearConnectionTimer();
+                    fallback.classList.add('is-visible');
+                    setStatus('The live broadcast server is currently unavailable.');
+                };
+                const beginConnectionTimer = () => {
+                    clearConnectionTimer();
+                    connectionTimer = window.setTimeout(showFallback, 15000);
+                };
+                const play = () => video.play().then(() => {
+                    clearConnectionTimer();
+                    fallback.classList.remove('is-visible');
+                    setStatus(liveText);
+                }).catch(() => {
+                    clearConnectionTimer();
+                    setStatus('LIVE — press play to start');
+                });
 
                 video.addEventListener('playing', () => setStatus(liveText));
-                video.addEventListener('waiting', () => setStatus('Buffering…'));
+                video.addEventListener('waiting', () => {
+                    setStatus('Buffering…');
+                    beginConnectionTimer();
+                });
+                video.addEventListener('error', showFallback);
 
-                if (! source) {
-                    video.addEventListener('loadedmetadata', play);
-                    video.addEventListener('error', () => setStatus('Unable to connect to the live stream.'));
-                    return;
-                }
-
-                // Safari, iPhone, iPad and some smart TVs play HLS natively.
-                if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = source;
-                    video.addEventListener('loadedmetadata', play);
-                    video.addEventListener('error', () => setStatus('Unable to connect to the live stream. Retrying…'));
-                    video.addEventListener('error', () => setTimeout(() => { video.src = source; video.load(); }, 5000));
-                    return;
-                }
-
-                if (! window.Hls || ! Hls.isSupported()) {
-                    setStatus('Your browser does not support live streaming. Please try another browser.');
-                    return;
-                }
-
-                // Chrome, Edge, Firefox and others use hls.js, recovering from dropped connections.
                 const start = () => {
-                    const hls = new Hls({ enableWorker: true, lowLatencyMode: true, backBufferLength: 30 });
+                    fallback.classList.remove('is-visible');
+                    setStatus('Connecting to live stream…');
+                    beginConnectionTimer();
+
+                    if (! source) {
+                        video.load();
+                        video.addEventListener('loadedmetadata', play, { once: true });
+                        return;
+                    }
+
+                    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        video.src = source;
+                        video.load();
+                        video.addEventListener('loadedmetadata', play, { once: true });
+                        return;
+                    }
+
+                    if (! window.Hls || ! Hls.isSupported()) {
+                        showFallback();
+                        return;
+                    }
+
+                    if (hls) {
+                        hls.destroy();
+                    }
+
+                    hls = new Hls({
+                        enableWorker: true,
+                        lowLatencyMode: false,
+                        backBufferLength: 30,
+                        manifestLoadingTimeOut: 10000,
+                        levelLoadingTimeOut: 10000,
+                        fragLoadingTimeOut: 15000,
+                    });
                     hls.loadSource(source);
                     hls.attachMedia(video);
                     hls.on(Hls.Events.MANIFEST_PARSED, play);
                     hls.on(Hls.Events.ERROR, (event, data) => {
-                        if (! data.fatal) return;
-                        setStatus('Stream connection problem. Reconnecting…');
-                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                            setTimeout(() => hls.startLoad(), 3000);
-                        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                        if (! data.fatal) {
+                            return;
+                        }
+
+                        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
                             hls.recoverMediaError();
                         } else {
-                            hls.destroy();
-                            setTimeout(start, 3000);
+                            showFallback();
                         }
                     });
                 };
+
+                retry.addEventListener('click', start);
                 start();
-            });
+            })();
         </script>
     @endpush
 @endif

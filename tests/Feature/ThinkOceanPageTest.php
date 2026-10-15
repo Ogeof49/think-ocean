@@ -147,7 +147,10 @@ class ThinkOceanPageTest extends TestCase
             ->assertOk()
             ->assertSee('Live now')
             ->assertSee('data-hls="https://rst5.saiuzwebnetwork.it:3635/hybrid/play.m3u8"', false)
-            ->assertSee('hls.min.js', false);
+            ->assertSee('hls.min.js', false)
+            ->assertSee('Live stream temporarily unavailable')
+            ->assertSee('Retry live stream')
+            ->assertSee('fragLoadingTimeOut: 15000', false);
     }
 
     public function test_live_tv_page_shows_off_air_screen_when_switched_off(): void
