@@ -30,6 +30,15 @@ return [
 
     'disks' => [
 
+        // Files uploaded through the Think Ocean CMS, served directly from public/ so no storage:link is needed.
+        'think_ocean' => [
+            'driver' => 'local',
+            'root' => public_path('uploads/think-ocean'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/uploads/think-ocean',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ThinkOceanMessage;
+use App\Models\ThinkOceanPartner;
 use App\Models\ThinkOceanPost;
 use App\Models\ThinkOceanProject;
 use App\Models\ThinkOceanSetting;
@@ -16,7 +17,7 @@ class ThinkOceanController extends Controller
 {
     public function index(): View
     {
-        return view('think-ocean.home', $this->shared());
+        return view('think-ocean.home', [...$this->shared(), 'partners' => ThinkOceanPartner::query()->published()->get()]);
     }
 
     public function page(Request $request, string $page): View
@@ -34,6 +35,10 @@ class ThinkOceanController extends Controller
         abort_unless(array_key_exists($page, $pages), 404);
 
         $data = [...$this->shared(), ...$pages[$page], 'page' => $page];
+
+        if ($page === 'about') {
+            $data['partners'] = ThinkOceanPartner::query()->published()->get();
+        }
 
         if ($page === 'projects') {
             $data['projects'] = ThinkOceanProject::query()->published()->orderBy('sort_order')->orderByDesc('id')->get();

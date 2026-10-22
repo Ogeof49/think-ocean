@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreThinkOceanPostRequest;
 use App\Http\Requests\StoreThinkOceanProjectRequest;
+use App\Http\Requests\StoreThinkOceanPartnerRequest;
 use App\Http\Requests\UpdateThinkOceanLiveRequest;
 use App\Http\Requests\UpdateThinkOceanSettingsRequest;
 use App\Models\ThinkOceanMessage;
+use App\Models\ThinkOceanPartner;
 use App\Models\ThinkOceanPost;
 use App\Models\ThinkOceanProject;
 use App\Models\ThinkOceanSetting;
 use App\Models\ThinkOceanSubscriber;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ThinkOceanCmsController extends Controller
@@ -23,6 +26,7 @@ class ThinkOceanCmsController extends Controller
             'settings' => array_merge(config('think_ocean.defaults'), ThinkOceanSetting::query()->pluck('value', 'key')->all()),
             'projects' => ThinkOceanProject::query()->orderBy('sort_order')->orderByDesc('id')->get(),
             'posts' => ThinkOceanPost::query()->latest('published_at')->latest('id')->get(),
+            'partners' => ThinkOceanPartner::query()->orderBy('sort_order')->orderBy('name')->get(),
             'messages' => ThinkOceanMessage::query()->latest()->limit(100)->get(),
             'subscribers' => ThinkOceanSubscriber::query()->latest()->get(),
             'contactEmail' => config('think_ocean.email'),
@@ -68,6 +72,31 @@ class ThinkOceanCmsController extends Controller
         }
 
         return back()->with('status', $values['live_enabled'] === '1' ? 'Live TV is now on air.' : 'Live TV settings saved (off air).');
+    }
+
+    public function storePartner(StoreThinkOceanPartnerRequest $request): RedirectResponse
+    {
+        ThinkOceanPartner::query()->create($this->partnerData($request, new ThinkOceanPartner));
+
+        return back()->with('status', 'Partner added.');
+    }
+
+    public function updatePartner(StoreThinkOceanPartnerRequest $request, ThinkOceanPartner $partner): RedirectResponse
+    {
+        $partner->update($this->partnerData($request, $partner));
+
+        return back()->with('status', 'Partner updated.');
+    }
+
+    public function destroyPartner(ThinkOceanPartner $partner): RedirectResponse
+    {
+        if ($partner->logo_path) {
+            Storage::disk('think_ocean')->delete($partner->logo_path);
+        }
+
+        $partner->delete();
+
+        return back()->with('status', 'Partner deleted.');
     }
 
     public function storeProject(StoreThinkOceanProjectRequest $request): RedirectResponse
@@ -118,6 +147,27 @@ class ThinkOceanCmsController extends Controller
         return array_merge($request->safe()->except(['is_published']), [
             'is_published' => $request->boolean('is_published'),
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function partnerData(StoreThinkOceanPartnerRequest $request, ThinkOceanPartner $partner): array
+    {
+        $data = [
+            ...$request->safe()->only(['name', 'website_url']),
+            'sort_order' => (int) $request->input('sort_order', 0),
+            'is_published' => $request->boolean('is_published'),
+        ];
+
+        // A new upload or an explicit removal replaces the stored logo file.
+        if ($request->hasFile('logo') || $request->boolean('remove_logo')) {
+            if ($partner->logo_path) {
+                Storage::disk('think_ocean')->delete($partner->logo_path);
+            }
+
+            $data['logo_path'] = $request->hasFile('logo') ? $request->file('logo')->store('partners', 'think_ocean') : null;
+        }
+
+        return $data;
     }
 
     /** @return array<string, mixed> */

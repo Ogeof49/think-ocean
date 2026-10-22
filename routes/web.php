@@ -31,6 +31,9 @@ Route::middleware(['auth', 'can:manage-think-ocean'])->prefix('think-ocean/admin
     Route::post('/posts', [ThinkOceanCmsController::class, 'storePost'])->name('posts.store');
     Route::put('/posts/{post}', [ThinkOceanCmsController::class, 'updatePost'])->name('posts.update');
     Route::delete('/posts/{post}', [ThinkOceanCmsController::class, 'destroyPost'])->name('posts.destroy');
+    Route::post('/partners', [ThinkOceanCmsController::class, 'storePartner'])->name('partners.store');
+    Route::put('/partners/{partner}', [ThinkOceanCmsController::class, 'updatePartner'])->name('partners.update');
+    Route::delete('/partners/{partner}', [ThinkOceanCmsController::class, 'destroyPartner'])->name('partners.destroy');
     Route::patch('/messages/{message}/read', [ThinkOceanCmsController::class, 'markMessageRead'])->name('messages.read');
     Route::delete('/messages/{message}', [ThinkOceanCmsController::class, 'destroyMessage'])->name('messages.destroy');
     Route::delete('/subscribers/{subscriber}', [ThinkOceanCmsController::class, 'destroySubscriber'])->name('subscribers.destroy');

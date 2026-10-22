@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\ThinkOceanMessage;
+use App\Models\ThinkOceanPartner;
 use App\Models\ThinkOceanPost;
 use App\Models\ThinkOceanProject;
 use App\Models\ThinkOceanSetting;
@@ -23,6 +24,21 @@ class ThinkOceanPageTest extends TestCase
             ->assertSee('Together for a sustainable ocean')
             ->assertSee('The ocean connects us all.')
             ->assertSee('rel="canonical"', false);
+    }
+
+    public function test_partners_section_shows_only_published_partners_and_hides_when_empty(): void
+    {
+        $this->get(route('think-ocean'))->assertDontSee('Our Partners');
+
+        ThinkOceanPartner::query()->create(['name' => 'Coastal Futures', 'is_published' => true]);
+        ThinkOceanPartner::query()->create(['name' => 'Draft Partner', 'is_published' => false]);
+
+        foreach ([route('think-ocean'), route('think-ocean.pages.show', 'about')] as $url) {
+            $this->get($url)
+                ->assertSee('Our Partners')
+                ->assertSee('Coastal Futures')
+                ->assertDontSee('Draft Partner');
+        }
     }
 
     public function test_navigation_links_point_to_standalone_pages(): void

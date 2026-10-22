@@ -87,6 +87,7 @@
         /* Shared sections */
         .section{padding:80px 0}
         .section-sm{padding:56px 0}
+        .section.pt-0{padding-top:0}
         .section-title{font-size:clamp(26px,3vw,34px);font-weight:600}
         .lead{font-size:17px;color:var(--muted);max-width:760px}
         .eyebrow{display:inline-block;margin-bottom:10px;color:var(--teal);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}

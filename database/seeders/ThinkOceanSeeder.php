@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ThinkOceanPartner;
 use App\Models\ThinkOceanPost;
 use App\Models\ThinkOceanProject;
 use App\Models\ThinkOceanSetting;
@@ -16,6 +17,26 @@ class ThinkOceanSeeder extends Seeder
     {
         foreach (config('think_ocean.defaults') as $key => $value) {
             ThinkOceanSetting::query()->firstOrCreate(['key' => $key], ['value' => $value]);
+        }
+
+        $partners = [
+            ['European Commission', null, 'https://commission.europa.eu'],
+            ['World Genome Academy', null, 'https://worldgeno.me'],
+            ['Six Partners Media', null, null],
+            ['Annua Global', null, null],
+            ['Museo de San Antonio-Chile (MUSA)', null, null],
+            ['Impactoverse', 'images/think-ocean/partners/impactoverse.png', 'https://impactoverse.com'],
+            ['EU UPSTREAM', 'images/think-ocean/partners/upstream.png', 'https://upstream-project.eu'],
+            ['University of Derby', 'images/think-ocean/partners/university-of-derby.svg', 'https://www.derby.ac.uk'],
+        ];
+
+        foreach ($partners as $order => [$name, $logo, $website]) {
+            ThinkOceanPartner::query()->firstOrCreate(['name' => $name], [
+                'logo_path' => $logo,
+                'website_url' => $website,
+                'is_published' => true,
+                'sort_order' => $order + 1,
+            ]);
         }
 
         $projects = [

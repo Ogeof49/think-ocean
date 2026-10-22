@@ -80,7 +80,9 @@
         </div>
     </section>
 
-    <section class="section">
+    @include('think-ocean.partials.partners')
+
+    <section @class(['section', 'pt-0' => $partners->isNotEmpty()])>
         <div class="wrap">
             <div class="cta-band">
                 @include('think-ocean.partials.icon', ['name' => 'waves', 'stroke' => 1.5])

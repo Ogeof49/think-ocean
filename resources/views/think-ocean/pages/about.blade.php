@@ -67,6 +67,8 @@
         </div>
     </section>
 
+    @include('think-ocean.partials.partners')
+
     <section class="quote">
         <div class="wrap">
             <blockquote>
